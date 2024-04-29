@@ -1,9 +1,11 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Main</h1>
+    <main className="flex flex-col justify-center items-center pt-5 gap-3">
+      <Link href="/registration">
+        <h1 className="text-xl">Comença a registrar-te</h1>
+      </Link>
     </main>
   );
 }
