@@ -1,4 +1,4 @@
-import RegistrationForms from "@/components/form/RegistrationForms";
+import RegistrationForm from "@/components/form/RegistrationForm";
 
 // comes from Cognito, I think the best is save it in useContext
 const data = {
@@ -13,7 +13,9 @@ export default function Home() {
         Si us plau, acabeu ompliu les vostres dades personals i les de la
         familia.
       </h2>
-      <RegistrationForms />
+      <div className="w-full max-w-[600px] flex flex-col gap-5">
+        <RegistrationForm />
+      </div>
     </main>
   );
 }

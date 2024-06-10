@@ -1,73 +1,27 @@
 "use client";
 
-import { Ref, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Form, Formik, FormikProps } from "formik";
-import { date, object, string } from "yup";
+import { Family, heardFrom } from "@/models/family";
+import { User } from "@/models/user";
+import { ErrorMessage, FieldArray, Form, Formik } from "formik";
+import React, { useState } from "react";
 import FieldForm from "./FieldForm";
 import { Button } from "../Button";
+import { registrationSchema } from "./RegistrationSchema";
 
-const birthDate18 = new Date(
-  new Date().getFullYear() - 18,
-  new Date().getMonth(),
-  new Date().getDate()
-);
-
-const formattedbirthDate18 = birthDate18.toISOString().split("T")[0];
-
-export interface User {
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  email: string;
-  dni: string;
-  phoneNumber: string;
-  address: {
-    street: string;
-    streetNumber: string;
-    postcode: string;
-    city: string;
-    flatNumber: string;
-    county: string;
-    country: string;
-  };
-}
-
-const userSchema = object({
-  firstName: string()
-    .min(2, "Ha de tenir al menys dos lletres")
-    .required("*Obligatori"),
-  lastName: string()
-    .min(2, "Ha de tenir al menys dos lletres")
-    .required("*Obligatori"),
-  birthDate: date()
-    .max(birthDate18, "Has de ser major de 18 anys per ser soci")
-    .required("*Obligatori"),
-  dni: string().required("*Obligatori"),
-  email: string()
-    .email("Adreça de correu electrònic incorrecte")
-    .required("*Obligatori"),
-  phoneNumber: string().required("*Obligatori"),
-});
-
-interface UserFormProps {
+interface RegistrationFormProps {
   disabled?: boolean;
-  userEmail?: string;
-  formRef: Ref<FormikProps<User>>;
 }
 
-export default function UserForm({
+export default function RegistrationForm({
   disabled = false,
-  userEmail,
-  formRef,
-}: UserFormProps) {
+}: RegistrationFormProps) {
   const [isDisabled, setIsDisabled] = useState(disabled);
 
-  const initialValues: User = {
+  const initialValues: User & Family = {
     firstName: "",
     lastName: "",
     birthDate: "",
-    email: userEmail ? userEmail : "",
+    email: "",
     dni: "",
     phoneNumber: "",
     address: {
@@ -79,21 +33,26 @@ export default function UserForm({
       county: "",
       country: "",
     },
+    bankAccount: "",
+    numberUsers: 2,
+    price: "0.00 €",
+    numberChildren: 0,
+    dateBirthChildren: [],
+    heardFrom: "",
   };
 
   return (
     <>
       <Formik
-        innerRef={formRef}
         initialValues={initialValues}
-        validationSchema={userSchema}
+        //  validationSchema={registrationSchema}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
           console.log(values);
           setIsDisabled(true);
         }}
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, values }) => (
           <Form className="flex flex-col gap-3 w-full">
             <FieldForm
               name="firstName"
@@ -101,7 +60,6 @@ export default function UserForm({
               type="text"
               placeholder="Nom"
               disabled={isDisabled}
-              // value={data.firstName}
             />
             <FieldForm
               name="lastName"
@@ -109,7 +67,6 @@ export default function UserForm({
               type="text"
               placeholder="Primer i Segon Cognom"
               disabled={isDisabled}
-              // value={data.lastName}
             />
             <div className="sm:flex gap-3">
               <FieldForm
@@ -117,7 +74,6 @@ export default function UserForm({
                 labelName="Data de naixement"
                 type="date"
                 disabled={isDisabled}
-                // value={data.birthDate}
               />
               <FieldForm
                 name="dni"
@@ -125,15 +81,13 @@ export default function UserForm({
                 type="text"
                 disabled={isDisabled}
                 placeholder="12345678A"
-                // value={data.dni}
               />
             </div>
             <FieldForm
               name="email"
               labelName="Correu electrònic"
               type="email"
-              disabled={userEmail ? true : isDisabled}
-              // value={data.email}
+              disabled={isDisabled}
             />
             <FieldForm
               name="phoneNumber"
@@ -141,7 +95,6 @@ export default function UserForm({
               type="tel"
               disabled={isDisabled}
               placeholder="+34612345678"
-              // value={data.phoneNumber}
             />
             <FieldForm
               name="address.street"
@@ -149,7 +102,6 @@ export default function UserForm({
               type="text"
               disabled={isDisabled}
               placeholder="Carrer, avinguda, passeig..."
-              // value={data.address.street}
             />
             <div className="sm:flex gap-3">
               <FieldForm
@@ -158,7 +110,6 @@ export default function UserForm({
                 type="text"
                 disabled={isDisabled}
                 placeholder="123A"
-                // value={data.address.streetNumber}
               />
               <FieldForm
                 name="address.flatNumber"
@@ -166,7 +117,6 @@ export default function UserForm({
                 type="text"
                 disabled={isDisabled}
                 placeholder="1-2"
-                // value={data.address.flatNumber}
               />
               <FieldForm
                 name="address.postcode"
@@ -174,7 +124,6 @@ export default function UserForm({
                 type="text"
                 disabled={isDisabled}
                 placeholder="08000"
-                // value={data.address.postcode}
               />
             </div>
             <FieldForm
@@ -183,7 +132,6 @@ export default function UserForm({
               type="text"
               disabled={isDisabled}
               placeholder="Ciutat, poble..."
-              // value={data.address.city}
             />
             <div className="sm:flex gap-3">
               <FieldForm
@@ -192,7 +140,6 @@ export default function UserForm({
                 type="text"
                 disabled={isDisabled}
                 placeholder="Comunitat Autònoma"
-                // value={data.address.city}
               />
               <FieldForm
                 name="address.country"
@@ -200,9 +147,90 @@ export default function UserForm({
                 type="text"
                 disabled={isDisabled}
                 placeholder="Païs"
-                // value={data.address.city}
               />
             </div>
+            <FieldForm
+              name="numberUsers"
+              labelName="Nombre de persones socies"
+              type="select"
+              placeholder="Primer i Segon Cognom"
+              disabled={isDisabled}
+            >
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+            </FieldForm>
+            <div className="sm:flex gap-3">
+              <FieldForm
+                name="price"
+                labelName="Preu quota anual"
+                type="text"
+                disabled
+                // needs to calculate price
+              />
+              <FieldForm
+                name="bankAccount"
+                labelName="IBAN"
+                type="text"
+                placeholder="IBAN"
+                disabled={isDisabled}
+              />
+
+              <FieldForm
+                name="numberChildren"
+                labelName="Nombre de criatures"
+                type="number"
+                disabled={isDisabled}
+              />
+            </div>
+            <FieldArray
+              name="dateBirthChildren"
+              render={(arrayHelpers) => (
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: values.numberChildren }, (_, i) => (
+                    <div key={i}>
+                      <p>Criatura {i + 1}</p>
+                      <FieldForm
+                        key={i}
+                        name={`dateBirthChildren[${i}]`}
+                        labelName="Data de naixement"
+                        type="date"
+                        disabled={isDisabled}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            />
+            <ErrorMessage name="dateBirthChildren">
+              {(msg) => <p className="text-red-600">{msg}</p>}
+            </ErrorMessage>
+            <FieldForm
+              name="heardFrom"
+              labelName="Com has arribat a nosaltres?"
+              type="select"
+              disabled={isDisabled}
+            >
+              {heardFrom.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </FieldForm>
+            {!isDisabled ? (
+              <Button
+                name={isSubmitting ? "Carregant" : "Continuar"}
+                type="submit"
+              />
+            ) : (
+              <Button
+                name="Editar"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsDisabled(false);
+                }}
+              />
+            )}
           </Form>
         )}
       </Formik>
