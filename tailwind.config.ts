@@ -18,6 +18,9 @@ const config: Config = {
         "primary-medium-light": "#FFB900",
         "primary-light": "#FFEED7",
       },
+      textColor: {
+        "light-dark": "#717171",
+      },
     },
   },
   plugins: [],
