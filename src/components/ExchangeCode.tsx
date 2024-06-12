@@ -2,6 +2,7 @@ import { gql, useMutation } from "@apollo/client";
 import { useContext } from "react";
 import { LoginContext } from "./LoginContextProvider";
 import { useNavigate } from "react-router-dom";
+import { document } from "postcss";
 
 const loginMutation = gql`
   mutation ($code: String!) {
@@ -28,6 +29,8 @@ export const ExchangeCode = () => {
         loginContext?.updateLoggedIn(true);
         console.log(response.data.login);
         const registrationResponse = response.data.login.registrationResponse;
+        console.log('Cookies:', response.extensions); // Log the cookies
+
         if (registrationResponse === null) {
           navigation("/adminPanel");
         } else {
