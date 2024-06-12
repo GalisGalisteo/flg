@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import logoImg from "@/assets/logo.png";
 
+
 export const MainHeader = () => {
   return (
     <header className="flex justify-center">

@@ -1,9 +1,36 @@
+"use client"; // This ensures the component is treated as a client-side component
+
+import {
+  LoginContext,
+  LoginContextProvider,
+} from "@/components/LoginContextProvider";
+import { ExchangeCode } from "@/components/ExchangeCode";
 import RegistrationForm from "@/components/form/RegistrationForm";
+import { ProtectedRoute } from "@/components/ProtectedRoutes";
+import { createApolloClient } from "@/utils/apolloConfiguration";
+import { ApolloProvider } from "@apollo/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 // comes from Cognito, I think the best is save it in useContext
 const data = {
   email: "montsegarcialopez@gmail.com",
 };
+
+export const AppRoutes = () => (
+  <Routes>
+    <Route path="/" element={<ExchangeCode />} />
+    <Route element={<ProtectedRoute />}>
+      <Route path="/registration" element={<RegistrationForm />} />
+      <Route path="/userPanel" element={<>userPanel</>} />
+      <Route path="/adminPanel" element={<>adminPanel</>} />
+    </Route>
+  </Routes>
+);
+
+const apolloClient = createApolloClient();
 
 export default function Home() {
   return (
@@ -14,7 +41,14 @@ export default function Home() {
         familia.
       </h2>
       <div className="w-full max-w-[600px] flex flex-col gap-5">
-        <RegistrationForm />
+        {/*<RegistrationForm/>*/}
+        <Router>
+          <ApolloProvider client={apolloClient}>
+            <LoginContextProvider>
+              <AppRoutes></AppRoutes>
+            </LoginContextProvider>
+          </ApolloProvider>
+        </Router>
       </div>
     </main>
   );

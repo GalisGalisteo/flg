@@ -6,7 +6,6 @@ import { ErrorMessage, FieldArray, Form, Formik } from "formik";
 import React, { useState } from "react";
 import FieldForm from "./FieldForm";
 import { Button } from "../Button";
-import { registrationSchema } from "./RegistrationSchema";
 
 interface RegistrationFormProps {
   disabled?: boolean;
@@ -48,7 +47,7 @@ export default function RegistrationForm({
         //  validationSchema={registrationSchema}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
-          console.log(values);
+          console.log('values', values);
           setIsDisabled(true);
         }}
       >
