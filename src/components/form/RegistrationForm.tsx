@@ -1,6 +1,6 @@
 "use client";
 
-import { Family, heardFrom } from "@/models/family";
+import { Family, howCognized } from "@/models/family";
 import { User } from "@/models/user";
 import { ErrorMessage, FieldArray, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ import { Button } from "../Button";
 import { gql, useMutation } from "@apollo/client";
 
 const initialValues: User & Family = {
-  firstName: "",
+  name: "",
   lastName: "",
   birthDate: "",
   email: "",
@@ -21,7 +21,7 @@ const initialValues: User & Family = {
     postcode: "",
     city: "",
     flatNumber: "",
-    county: "",
+    district: "",
     country: "",
   },
   bankAccount: "",
@@ -29,39 +29,44 @@ const initialValues: User & Family = {
   price: "0.00 €",
   numberChildren: 0,
   dateBirthChildren: [],
-  heardFrom: "",
+  howCognized: "",
+  agreements: {
+    agreement1: false,
+    agreement2: false,
+    agreement3: false,
+  },
 };
 
-const exampleAddress = {
-  street: "street",
-  streetNumber: "2",
-  postcode: "2323",
-  city: "barcelona",
-  flatNumber: "2",
-  country: "neverland",
-  district: "district",
-};
-const exampleMemberData = {
-  name: "name",
-  surname: "surname",
-  birthDate: "11-12-1999",
-  email: "member@op.pl",
-  phone: "phone",
-  nif: "nif",
-  address: exampleAddress,
-};
+// const exampleAddress = {
+//   street: "street",
+//   streetNumber: "2",
+//   postcode: "2323",
+//   city: "barcelona",
+//   flatNumber: "2",
+//   country: "neverland",
+//   district: "district",
+// };
+// const exampleMemberData = {
+//   name: "name",
+//   surname: "surname",
+//   birthDate: "11-12-1999",
+//   email: "member@op.pl",
+//   phone: "phone",
+//   nif: "nif",
+//   address: exampleAddress,
+// };
 
-const exampleAgreements = {
-  agreement1: true,
-  agreement2: true,
-  agreement3: true,
-};
-const exampleFamilyData = {
-  agreements: exampleAgreements,
-  bankAccount: "bankaccount",
-  children: [],
-  howCognized: "instagram",
-};
+// const exampleAgreements = {
+//   agreement1: true,
+//   agreement2: true,
+//   agreement3: true,
+// };
+// const exampleFamilyData = {
+//   agreements: exampleAgreements,
+//   bankAccount: "bankaccount",
+//   children: [],
+//   howCognized: "instagram",
+// };
 const createFamilyAccountMutation = gql`
   mutation (
     $members: [MemberData]
@@ -121,13 +126,46 @@ export default function RegistrationForm({
   const [isDisabled, setIsDisabled] = useState(disabled);
   const [createFamily] = useMutation(createFamilyAccountMutation);
 
-  const fetchCreateFamily = async () => {
+  const fetchCreateFamily = async (values: User & Family) => {
     try {
+      console.log("fetchCreateFamily: ", values);
+
+      const memberData = {
+        name: values.name,
+        surname: values.lastName,
+        birthDate: values.birthDate,
+        email: values.email,
+        phone: values.phoneNumber,
+        nif: values.dni,
+        address: {
+          street: values.address.street,
+          streetNumber: values.address.streetNumber,
+          flatNumber: values.address.flatNumber,
+          postcode: values.address.postcode,
+          city: values.address.city,
+          country: values.address.country,
+          district: values.address.district,
+        },
+      };
+
+      const familyData = {
+        bankAccount: values.bankAccount,
+        children: values.dateBirthChildren,
+        howCognized: values.howCognized,
+        agreements: values.agreements,
+      };
+
+      console.log("Payload being sent:", {
+        members: [memberData],
+        familyData: familyData,
+        expectedMembers: values.numberUsers.toString(),
+      });
+
       const response = await createFamily({
         variables: {
-          members: [exampleMemberData],
-          familyData: exampleFamilyData,
-          expectedMembers: "1",
+          members: [memberData],
+          familyData: familyData,
+          expectedMembers: values.numberUsers.toString(),
         },
       });
       const statusCode = response.extensions?.statusCode;
@@ -146,6 +184,7 @@ export default function RegistrationForm({
         //  validationSchema={registrationSchema}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
+
           console.log("values", values);
           setIsDisabled(true);
         }}
@@ -153,7 +192,7 @@ export default function RegistrationForm({
         {({ isSubmitting, values }) => (
           <Form className="flex flex-col gap-3 w-full">
             <FieldForm
-              name="firstName"
+              name="name"
               labelName="Nom"
               type="text"
               placeholder="Nom"
@@ -233,7 +272,7 @@ export default function RegistrationForm({
             />
             <div className="sm:flex gap-3">
               <FieldForm
-                name="address.county"
+                name="address.district"
                 labelName="Comunitat Autònoma"
                 type="text"
                 disabled={isDisabled}
@@ -303,17 +342,35 @@ export default function RegistrationForm({
               {(msg) => <p className="text-red-600">{msg}</p>}
             </ErrorMessage>
             <FieldForm
-              name="heardFrom"
+              name="howCognized"
               labelName="Com has arribat a nosaltres?"
               type="select"
               disabled={isDisabled}
             >
-              {heardFrom.map((option) => (
+              {howCognized.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </FieldForm>
+            <FieldForm
+              name="agreements.agreement1"
+              labelName="Accepto 1"
+              type="checkbox"
+              disabled={isDisabled}
+            />
+            <FieldForm
+              name="agreements.agreement2"
+              labelName="Accepto 2"
+              type="checkbox"
+              disabled={isDisabled}
+            />
+            <FieldForm
+              name="agreements.agreement3"
+              labelName="Accepto 3"
+              type="checkbox"
+              disabled={isDisabled}
+            />
             {!isDisabled ? (
               <Button
                 name={isSubmitting ? "Carregant" : "Continuar"}
@@ -332,8 +389,8 @@ export default function RegistrationForm({
                 <Button
                   name="Send"
                   type="button"
-                  onClick={(values) => {
-                    fetchCreateFamily();
+                  onClick={() => {
+                    fetchCreateFamily(values);
                     console.log("values send", values);
                   }}
                 />

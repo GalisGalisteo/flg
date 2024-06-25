@@ -1,5 +1,5 @@
 export interface User {
-  firstName: string;
+  name: string;
   lastName: string;
   birthDate: string;
   email: string;
@@ -11,7 +11,7 @@ export interface User {
     postcode: string;
     city: string;
     flatNumber: string;
-    county: string;
+    district: string;
     country: string;
   };
 }

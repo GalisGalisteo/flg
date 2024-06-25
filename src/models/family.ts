@@ -1,4 +1,4 @@
-export const heardFrom = [
+export const howCognized = [
   "",
   "Facebook",
   "Instagram",
@@ -8,7 +8,7 @@ export const heardFrom = [
   "Un altre",
 ] as const;
 
-type HeardFrom = (typeof heardFrom)[number];
+type HeardFrom = (typeof howCognized)[number];
 
 export interface Family {
   bankAccount: string;
@@ -16,5 +16,10 @@ export interface Family {
   price: string;
   numberChildren: number;
   dateBirthChildren: string[];
-  heardFrom: HeardFrom | null;
+  howCognized: HeardFrom | null;
+  agreements: {
+    agreement1: boolean;
+    agreement2: boolean;
+    agreement3: boolean;
+  };
 }
