@@ -1,9 +1,5 @@
-import RegistrationForm from "@/components/form/RegistrationForm";
-
-// comes from Cognito, I think the best is save it in useContext
-const data = {
-  email: "montsegarcialopez@gmail.com",
-};
+import { ExchangeCode } from "@/components/ExchangeCode";
+import { LoginContextProvider } from "@/components/LogingContextProvider";
 
 export default function Home() {
   return (
@@ -14,7 +10,7 @@ export default function Home() {
         familia.
       </h2>
       <div className="w-full max-w-[600px] flex flex-col gap-5">
-        <RegistrationForm />
+        <ExchangeCode />
       </div>
     </main>
   );

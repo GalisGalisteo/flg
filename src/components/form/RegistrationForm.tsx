@@ -3,10 +3,113 @@
 import { Family, heardFrom } from "@/models/family";
 import { User } from "@/models/user";
 import { ErrorMessage, FieldArray, Form, Formik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FieldForm from "./FieldForm";
 import { Button } from "../Button";
-import { registrationSchema } from "./RegistrationSchema";
+import { gql, useMutation } from "@apollo/client";
+
+const initialValues: User & Family = {
+  firstName: "",
+  lastName: "",
+  birthDate: "",
+  email: "",
+  dni: "",
+  phoneNumber: "",
+  address: {
+    street: "",
+    streetNumber: "",
+    postcode: "",
+    city: "",
+    flatNumber: "",
+    county: "",
+    country: "",
+  },
+  bankAccount: "",
+  numberUsers: 2,
+  price: "0.00 €",
+  numberChildren: 0,
+  dateBirthChildren: [],
+  heardFrom: "",
+};
+
+const exampleAddress = {
+  street: "street",
+  streetNumber: "2",
+  postcode: "2323",
+  city: "barcelona",
+  flatNumber: "2",
+  country: "neverland",
+  district: "district",
+};
+const exampleMemberData = {
+  name: "name",
+  surname: "surname",
+  birthDate: "11-12-1999",
+  email: "member@op.pl",
+  phone: "phone",
+  nif: "nif",
+  address: exampleAddress,
+};
+
+const exampleAgreements = {
+  agreement1: true,
+  agreement2: true,
+  agreement3: true,
+};
+const exampleFamilyData = {
+  agreements: exampleAgreements,
+  bankAccount: "bankaccount",
+  children: [],
+  howCognized: "instagram",
+};
+const createFamilyAccountMutation = gql`
+  mutation (
+    $members: [MemberData]
+    $familyData: FamilyData
+    $expectedMembers: String
+  ) {
+    createFamilyAccount(
+      members: $members
+      familyData: $familyData
+      expectedMembers: $expectedMembers
+    ) {
+      id
+      members {
+        id
+        name
+        surname
+        birthDate
+        email
+        nif
+        phone
+        memberExternalId
+        adminAssignatedId
+        address {
+          street
+          streetNumber
+          flatNumber
+          postcode
+          city
+          district
+          country
+        }
+      }
+      agreements {
+        agreement1
+        agreement2
+        agreement3
+      }
+
+      foundingMemberExternalId
+      children
+      bankAccount
+      isActive
+      activationDate
+      inactivationDate
+      howCognized
+    }
+  }
+`;
 
 interface RegistrationFormProps {
   disabled?: boolean;
@@ -16,29 +119,24 @@ export default function RegistrationForm({
   disabled = false,
 }: RegistrationFormProps) {
   const [isDisabled, setIsDisabled] = useState(disabled);
+  const [createFamily] = useMutation(createFamilyAccountMutation);
 
-  const initialValues: User & Family = {
-    firstName: "",
-    lastName: "",
-    birthDate: "",
-    email: "",
-    dni: "",
-    phoneNumber: "",
-    address: {
-      street: "",
-      streetNumber: "",
-      postcode: "",
-      city: "",
-      flatNumber: "",
-      county: "",
-      country: "",
-    },
-    bankAccount: "",
-    numberUsers: 2,
-    price: "0.00 €",
-    numberChildren: 0,
-    dateBirthChildren: [],
-    heardFrom: "",
+  const fetchCreateFamily = async () => {
+    try {
+      const response = await createFamily({
+        variables: {
+          members: [exampleMemberData],
+          familyData: exampleFamilyData,
+          expectedMembers: "1",
+        },
+      });
+      const statusCode = response.extensions?.statusCode;
+      if (statusCode === 200) {
+        console.log(response);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -48,7 +146,7 @@ export default function RegistrationForm({
         //  validationSchema={registrationSchema}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
-          console.log(values);
+          console.log("values", values);
           setIsDisabled(true);
         }}
       >
@@ -222,14 +320,24 @@ export default function RegistrationForm({
                 type="submit"
               />
             ) : (
-              <Button
-                name="Editar"
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsDisabled(false);
-                }}
-              />
+              <>
+                <Button
+                  name="Editar"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsDisabled(false);
+                  }}
+                />
+                <Button
+                  name="Send"
+                  type="button"
+                  onClick={(values) => {
+                    fetchCreateFamily();
+                    console.log("values send", values);
+                  }}
+                />
+              </>
             )}
           </Form>
         )}
