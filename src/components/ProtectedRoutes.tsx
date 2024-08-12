@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useLoginContext } from "@/hooks/useLogingContext";
+import { useLoginContext } from "@/contexts/login/useLogingContext";
 
 interface ProtectedRouteProps {
   children: ReactNode;

@@ -4,12 +4,19 @@ import { ButtonHTMLAttributes } from "react";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   name: string;
   color?: string;
+  className?: string;
 }
 
-export const Button = ({ name, color = "primary", ...props }: ButtonProps) => {
+export const Button = ({
+  name,
+  color = "primary",
+  className,
+  ...props
+}: ButtonProps) => {
   return (
     <button
       className={clsx(
+        className,
         "rounded-lg w-full px-4 py-2 disabled:bg-opacity-50 font-bold",
         {
           "bg-primary": color === "primary",

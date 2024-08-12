@@ -1,4 +1,4 @@
-import { heardFrom } from "@/models/family";
+import { heardFrom } from "@/types/family";
 import { birthDate18 } from "@/utils/utils";
 import { array, date, number, object, string } from "yup";
 

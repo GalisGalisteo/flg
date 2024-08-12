@@ -34,7 +34,7 @@ FieldFormProps) {
         className={clsx(
           "text-lg px-3 py-2 w-full rounded-lg disabled:text-light-dark disabled:opacity-100",
           disabled
-            ? "disabled:bg-primary-light"
+            ? "disabled:bg-transparent"
             : "bg-white border border-gray-300"
         )}
         disabled={disabled}

@@ -2,12 +2,12 @@
 
 import { ReactNode, createContext, useState } from "react";
 
-export interface LoginContext {
+export interface ILoginContext {
   isLoggedIn: boolean;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
 }
 
-export const LoginContext = createContext<LoginContext | undefined>(undefined);
+export const LoginContext = createContext<ILoginContext | undefined>(undefined);
 
 interface LoginContextProviderProps {
   children: ReactNode;

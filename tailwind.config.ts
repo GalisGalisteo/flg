@@ -17,6 +17,7 @@ const config: Config = {
         primary: "#f28d05",
         "primary-medium-light": "#FFB900",
         "primary-light": "#FFEED7",
+        "primary-extra-light": "#FFF6E9",
       },
       textColor: {
         "light-dark": "#717171",

@@ -6,7 +6,8 @@ import "./globals.css";
 import { MainHeader } from "@/components/MainHeader";
 import { createApolloClient } from "@/utils/apolloConfiguration";
 import { ApolloProvider } from "@apollo/client";
-import { LoginContextProvider } from "@/components/LogingContextProvider";
+import { LoginContextProvider } from "@/contexts/login/LogingContextProvider";
+import { CognitoContextProvider } from "@/contexts/cognito/CognitoContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,7 +16,7 @@ const inter = Inter({ subsets: ["latin"] });
 //   description: "Families LGTBI+",
 // };
 
-const apolloClient = createApolloClient();
+export const apolloClient = createApolloClient();
 
 export default function RootLayout({
   children,
@@ -24,11 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={(inter.className, "bg-primary-light")}>
+      <body className={(inter.className, "bg-primary-light mx-auto")}>
         <ApolloProvider client={apolloClient}>
           <LoginContextProvider>
-            <MainHeader />
-            {children}
+            <CognitoContextProvider>
+              <MainHeader />
+              {children}
+            </CognitoContextProvider>
           </LoginContextProvider>
         </ApolloProvider>
       </body>

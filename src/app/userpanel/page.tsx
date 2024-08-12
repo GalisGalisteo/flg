@@ -1,10 +1,127 @@
+"use client";
+
+import RegistrationForm from "@/components/form/RegistrationForm";
 import ProtectedRoute from "@/components/ProtectedRoutes";
-import React from "react";
+import { gql, useQuery } from "@apollo/client";
 
 export default function UserPanel() {
+  const GET_FAMILY_ACCOUNT = gql`
+    query GetFamilyAccount {
+      getFamilyAccount {
+        id
+        foundingMemberExternalId
+        members {
+          id
+          name
+          surname
+          birthDate
+          email
+          phone
+          nif
+          address {
+            street
+            streetNumber
+            flatNumber
+            postcode
+            city
+            district
+            country
+          }
+          memberExternalId
+          adminAssignatedId
+        }
+        bankAccount
+        children
+        agreements {
+          agreement1
+          agreement2
+          agreement3
+        }
+        isActive
+        activationDate
+        inactivationDate
+        howCognized
+      }
+    }
+  `;
+
+  const { loading, error, data } = useQuery(GET_FAMILY_ACCOUNT);
+  console.log("data", data);
+
   return (
     <ProtectedRoute>
-      <div>UserPanel</div>;
+      <div>UserPanel</div>
+      <div className="m-5 max-w-screen-sm">
+        {!loading && data ? (
+          <RegistrationForm data={data?.getFamilyAccount} userpanel disabled />
+        ) : (
+          <div>Loading...</div>
+        )}
+      </div>
     </ProtectedRoute>
   );
 }
+
+const testData = {
+  __typename: "FamilyAccount",
+  id: "d3ad6e03-a3c4-4b76-a874-21ba9a4f9d2e",
+  foundingMemberExternalId: "2a2a222a-c5f4-4c38-b08b-f257ed3750cc",
+  members: [
+    {
+      __typename: "Member",
+      id: "64238fa1-35c7-4c2f-bd90-5778b07d7066",
+      name: "Test",
+      surname: "Test",
+      birthDate: "2024-08-08",
+      email: "member@op.pl",
+      phone: "123123455",
+      nif: "123124134",
+      address: {
+        __typename: "Address",
+        street: "fbesfb",
+        streetNumber: "3",
+        flatNumber: "1",
+        postcode: "12312",
+        city: "fgber",
+        district: "rege",
+        country: "ger",
+      },
+      memberExternalId: "2a2a222a-c5f4-4c38-b08b-f257ed3750cc",
+      adminAssignatedId: null,
+    },
+    {
+      __typename: "Member",
+      id: "74857eb5-4c37-489f-9f56-6768d9d1b7f2",
+      name: "Jane",
+      surname: "Doe",
+      birthDate: "1990-05-15",
+      email: "jane.doe@example.com",
+      phone: "987654321",
+      nif: "AB123456C",
+      address: {
+        __typename: "Address",
+        street: "Main Street",
+        streetNumber: "12",
+        flatNumber: "2B",
+        postcode: "90210",
+        city: "Los Angeles",
+        district: "California",
+        country: "USA",
+      },
+      memberExternalId: "4b4b444b-c9f4-4c38-b08b-f257ed3750cd",
+      adminAssignatedId: null,
+    },
+  ],
+  bankAccount: "ergergergeg",
+  children: ["2024-08-17"],
+  agreements: {
+    __typename: "Agreements",
+    agreement1: true,
+    agreement2: true,
+    agreement3: true,
+  },
+  isActive: false,
+  activationDate: null,
+  inactivationDate: null,
+  howCognized: "Facebook",
+};

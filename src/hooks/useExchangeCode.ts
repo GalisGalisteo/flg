@@ -1,8 +1,10 @@
 "use client";
 
 import { gql, useMutation } from "@apollo/client";
-import { useLoginContext } from "@/hooks/useLogingContext";
+import { useLoginContext } from "../contexts/login/useLogingContext";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useCognitoContext } from "@/contexts/cognito/useCognitoContext";
 
 const loginMutation = gql`
   mutation ($code: String!) {
@@ -16,12 +18,13 @@ const loginMutation = gql`
   }
 `;
 
-export const ExchangeCode = () => {
-  const { isLoggedIn, setIsLoggedIn } = useLoginContext();
+export const useExchangeCode = () => {
+  const { setUserEmail } = useCognitoContext();
+  const { setIsLoggedIn } = useLoginContext();
   const [login] = useMutation(loginMutation);
   const router = useRouter();
 
-  const fetchLogin = async () => {
+  const exchangeCode = useCallback(async () => {
     try {
       const response = await login({ variables: { code: "user" } });
       const statusCode = response.extensions?.statusCode;
@@ -30,10 +33,11 @@ export const ExchangeCode = () => {
         console.log(response.data.login);
         const registrationResponse = response.data.login.registrationResponse;
         if (registrationResponse === null) {
-          router.push("/adminPanel");
+          router.push("/adminpanel");
         } else {
+          setUserEmail(registrationResponse.email);
           registrationResponse.hasFamilyAccount
-            ? router.push("/userPanel")
+            ? router.push("/userpanel")
             : router.push("/registration");
         }
       }
@@ -41,18 +45,7 @@ export const ExchangeCode = () => {
       setIsLoggedIn(false);
       console.log(error);
     }
-  };
+  }, [login, setIsLoggedIn, setUserEmail, router]);
 
-  return (
-    <>
-      <button
-        style={{ background: "blue" }}
-        onClick={() => {
-          fetchLogin();
-        }}
-      >
-        <div style={{ color: "white" }}>Send code</div>
-      </button>
-    </>
-  );
+  return { exchangeCode };
 };
