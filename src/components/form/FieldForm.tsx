@@ -1,15 +1,15 @@
+import { ErrorMessage, Field, FieldAttributes, useField } from "formik";
+import { printFormat } from "iban";
 import clsx from "clsx";
-import { ErrorMessage, Field, FieldAttributes, FieldProps } from "formik";
 
-interface FieldFormProps {
+interface FieldFormProps extends FieldAttributes<any> {
   name: string;
   labelName: string;
   type: string;
   placeholder?: string;
   disabled?: boolean;
+  className?: string;
   children?: React.ReactNode;
-  // value?: string;
-  //  [key: string]: any;
 }
 
 export default function FieldForm({
@@ -18,13 +18,35 @@ export default function FieldForm({
   type,
   placeholder,
   disabled,
+  className,
   children,
-}: // value,
-//  ...props
-FieldFormProps) {
+}: FieldFormProps) {
+  const [field, meta, helpers] = useField(name);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let { type, value, checked } = event.target;
+
+    if (type === "checkbox") {
+      helpers.setValue(checked);
+    } else if (name === "bankAccount") {
+      value = printFormat(value, " ");
+      helpers.setValue(value);
+    } else {
+      helpers.setValue(value);
+    }
+  };
   return (
-    <div className="flex flex-col gap-1 w-full">
-      <label className="text-sm font-semibold" htmlFor={name}>
+    <div
+      className={clsx(
+        className,
+        "flex w-full",
+        type === "checkbox" ? "flex-row items-center gap-2" : "flex-col gap-1"
+      )}
+    >
+      <label
+        className={clsx("text-sm", type !== "checkbox" ? "font-semibold" : "")}
+        htmlFor={name}
+      >
         {labelName}
       </label>
       <Field
@@ -32,20 +54,20 @@ FieldFormProps) {
         type={type}
         placeholder={disabled ? null : placeholder}
         className={clsx(
-          "text-lg px-3 py-2 w-full rounded-lg disabled:text-light-dark disabled:opacity-100",
+          "text-lg",
+          type !== "checkbox" ? "px-3 py-2 w-full rounded-lg" : "",
           disabled
-            ? "disabled:bg-transparent"
+            ? "disabled:text-light-dark disabled:opacity-100 disabled:bg-transparent"
             : "bg-white border border-gray-300"
         )}
         disabled={disabled}
         as={type === "select" ? "select" : "input"}
-        //value={value}
-        // {...props}
+        onChange={handleChange}
       >
         {type === "select" ? children : null}
       </Field>
       <ErrorMessage name={name}>
-        {(msg) => <p className="text-red-600">{msg}</p>}
+        {(msg) => <p className="text-red-600 text-sm">{msg}</p>}
       </ErrorMessage>
     </div>
   );

@@ -1,11 +1,13 @@
 "use client";
 
+import LoadingImage from "@/components/common/LoadingImage";
 import RegistrationForm from "@/components/form/RegistrationForm";
 import ProtectedRoute from "@/components/ProtectedRoutes";
+import { Family } from "@/types/family";
 import { gql, useQuery } from "@apollo/client";
 
 export default function UserPanel() {
-  const GET_FAMILY_ACCOUNT = gql`
+  const getFamilyAccount = gql`
     query GetFamilyAccount {
       getFamilyAccount {
         id
@@ -45,18 +47,44 @@ export default function UserPanel() {
     }
   `;
 
-  const { loading, error, data } = useQuery(GET_FAMILY_ACCOUNT);
-  console.log("data", data);
+  interface FamilyQuery {
+    getFamilyAccount: Family;
+  }
+
+  const { loading, error, data } = useQuery<FamilyQuery>(getFamilyAccount);
+  const name = data?.getFamilyAccount.members[0].name;
 
   return (
     <ProtectedRoute>
-      <div>UserPanel</div>
-      <div className="m-5 max-w-screen-sm">
+      <div className="max-w-screen-sm mx-auto space-y-2 mb-10">
+        <div className="text-center space-y-3 p-5">
+          <h1 className="text-xl">
+            Hola <span className="text-2xl font-semibold">{name}</span>!
+          </h1>
+          <p className="text-lg">
+            A continuació tens les teves dades i les de la teva familia:
+          </p>
+        </div>
+        {error && !loading ? <p>An error ocurred: {error.message}</p> : null}
         {!loading && data ? (
-          <RegistrationForm data={data?.getFamilyAccount} userpanel disabled />
+          <RegistrationForm data={data.getFamilyAccount} userpanel disabled />
         ) : (
-          <div>Loading...</div>
+          <div className="flex justify-center items-center h-[500px]">
+            <LoadingImage />
+          </div>
         )}
+        <div className="text-center space-y-3 p-5">
+          <p>
+            Si necessiteu modificar les dades, donar-se de baixa o afegir a un
+            altra persona socia a la vostra familia, heu de enviar un mail amb
+            el vostre número de soci a:
+          </p>
+          <p className="font-bold">
+            <a href="mailto:familieslg@familieslg.org">
+              familieslg@familieslg.org
+            </a>
+          </p>
+        </div>
       </div>
     </ProtectedRoute>
   );

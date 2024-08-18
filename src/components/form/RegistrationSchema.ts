@@ -1,26 +1,59 @@
-import { heardFrom } from "@/types/family";
+import { howCognized } from "@/types/family";
 import { birthDate18 } from "@/utils/utils";
-import { array, date, number, object, string } from "yup";
+import { array, boolean, date, number, object, string } from "yup";
+import { isValid } from "iban";
 
 export const registrationSchema = object({
-  firstName: string()
-    .min(2, "Ha de tenir al menys dos lletres")
+  members: array().of(
+    object({
+      name: string()
+        .min(2, "Si us plau, escriu el teu nom")
+        .required("*Obligatori"),
+      surname: string()
+        .min(2, "Si us plau, escriu el teu cognom")
+        .required("*Obligatori"),
+      birthDate: date()
+        .max(birthDate18, "Has de ser major de 18 anys per ser soci")
+        .required("*Obligatori"),
+      nif: string().required("*Obligatori"),
+      email: string()
+        .email("Adreça de correu electrònic incorrecte")
+        .required("*Obligatori"),
+      phone: string().required("*Obligatori"),
+      address: object({
+        street: string().required("*Obligatori"),
+        streetNumber: string().required("*Obligatori"),
+        postcode: string().required("*Obligatori"),
+        city: string().required("*Obligatori"),
+        flatNumber: string(),
+        district: string().required("*Obligatori"),
+        country: string().required("*Obligatori"),
+      }),
+    })
+  ),
+  catResident: string()
+    .required("*Obligatori")
+    .oneOf(["1", "0"], "escull una de les opcions"),
+  bankAccount: string()
+    .test("iban", "IBAN no és vàlid", (value) =>
+      value ? isValid(value) : true
+    )
     .required("*Obligatori"),
-  lastName: string()
-    .min(2, "Ha de tenir al menys dos lletres")
+  numberUsers: number()
+    .required("*Obligatori")
+    .oneOf([1, 2], "escull una de les opcions"),
+  numberChildren: number()
+    .integer()
+    .min(0, "no pot ser inferior a 0")
+    .max(14, "no pot ser superior a 14")
     .required("*Obligatori"),
-  birthDate: date()
-    .max(birthDate18, "Has de ser major de 18 anys per ser soci")
-    .required("*Obligatori"),
-  dni: string().required("*Obligatori"),
-  email: string()
-    .email("Adreça de correu electrònic incorrecte")
-    .required("*Obligatori"),
-  phoneNumber: string().required("*Obligatori"),
-  bankAccount: string().required("*Obligatori"),
-  numberUsers: number().required("*Obligatori").oneOf([1, 2]),
-  price: string().required("*Obligatori"),
-  numberChildren: number().integer().min(0).max(14).required("*Obligatori"),
-  dateBirthChildren: array().of(date().required("*Obligatori")),
-  heardFrom: string().required("*Obligatori").oneOf(heardFrom),
+  children: array().of(date().required("*Obligatori")),
+  howCognized: string()
+    .required("*Obligatori")
+    .oneOf(howCognized, "escull una de les opcions"),
+  agreements: object({
+    agreement1: boolean().oneOf([true], "*"),
+    agreement2: boolean().oneOf([true], "*"),
+    agreement3: boolean(),
+  }),
 });

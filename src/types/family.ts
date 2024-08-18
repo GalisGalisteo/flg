@@ -1,5 +1,4 @@
 export const howCognized = [
-  "",
   "Facebook",
   "Instagram",
   "Buscador internet (Google...)",
@@ -8,7 +7,7 @@ export const howCognized = [
   "Un altre",
 ] as const;
 
-type HeardFrom = (typeof howCognized)[number];
+type HowCognized = "" | (typeof howCognized)[number];
 
 interface Member {
   id?: string;
@@ -48,5 +47,6 @@ export interface Family {
   isActive?: boolean;
   activationDate?: string;
   inactivationDate?: string;
-  howCognized: HeardFrom;
+  howCognized: HowCognized;
+  catResident: boolean | null | string;
 }

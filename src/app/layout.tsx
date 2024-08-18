@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={(inter.className, "bg-primary-light mx-auto")}>
+      <body className={(inter.className, "bg-primary-light")}>
         <ApolloProvider client={apolloClient}>
           <LoginContextProvider>
             <CognitoContextProvider>
