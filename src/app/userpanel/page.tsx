@@ -1,52 +1,13 @@
 "use client";
 
 import LoadingImage from "@/components/common/LoadingImage";
-import RegistrationForm from "@/components/form/RegistrationForm";
-import ProtectedRoute from "@/components/ProtectedRoutes";
+import FamilyForm from "@/components/form/FamilyForm";
+import ProtectedRoute from "@/components/common/ProtectedRoutes";
 import { Family } from "@/types/family";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
+import { getFamilyAccount } from "@/graphql/mutations";
 
 export default function UserPanel() {
-  const getFamilyAccount = gql`
-    query GetFamilyAccount {
-      getFamilyAccount {
-        id
-        foundingMemberExternalId
-        members {
-          id
-          name
-          surname
-          birthDate
-          email
-          phone
-          nif
-          address {
-            street
-            streetNumber
-            flatNumber
-            postcode
-            city
-            district
-            country
-          }
-          memberExternalId
-          adminAssignatedId
-        }
-        bankAccount
-        children
-        agreements {
-          agreement1
-          agreement2
-          agreement3
-        }
-        isActive
-        activationDate
-        inactivationDate
-        howCognized
-      }
-    }
-  `;
-
   interface FamilyQuery {
     getFamilyAccount: Family;
   }
@@ -67,7 +28,7 @@ export default function UserPanel() {
         </div>
         {error && !loading ? <p>An error ocurred: {error.message}</p> : null}
         {!loading && data ? (
-          <RegistrationForm data={data.getFamilyAccount} userpanel disabled />
+          <FamilyForm data={data.getFamilyAccount} userpanel disabled />
         ) : (
           <div className="flex justify-center items-center h-[500px]">
             <LoadingImage />

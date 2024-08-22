@@ -1,5 +1,5 @@
-import clsx from "clsx";
 import { ButtonHTMLAttributes } from "react";
+import clsx from "clsx";
 
 type Color = "primary" | "danger" | "success";
 

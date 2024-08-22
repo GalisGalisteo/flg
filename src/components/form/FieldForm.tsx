@@ -1,50 +1,61 @@
-import { ErrorMessage, Field, FieldAttributes, useField } from "formik";
-import { printFormat } from "iban";
+import { ErrorMessage, Field, useField } from "formik";
+import { ChangeEvent } from "react";
 import clsx from "clsx";
 
-interface FieldFormProps extends FieldAttributes<any> {
+interface FieldFormProps {
   name: string;
   labelName: string;
-  type: string;
-  placeholder?: string;
-  disabled?: boolean;
-  className?: string;
+  type: "text" | "email" | "number" | "select" | "checkbox" | "tel" | "date";
   children?: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  formatValue?: (value: string) => string;
+  placeholder?: string;
 }
 
 export default function FieldForm({
   name,
   labelName,
   type,
-  placeholder,
-  disabled,
-  className,
   children,
+  className,
+  disabled,
+  formatValue,
+  placeholder,
 }: FieldFormProps) {
   const [field, meta, helpers] = useField(name);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let { type, value, checked } = event.target;
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { type, value, checked } = event.target;
+
+    let newValue;
 
     if (type === "checkbox") {
-      helpers.setValue(checked);
-    } else if (name === "bankAccount") {
-      value = printFormat(value, " ");
-      helpers.setValue(value);
+      newValue = checked;
+    } else if (formatValue && type === "text") {
+      newValue = formatValue(value);
     } else {
-      helpers.setValue(value);
+      newValue = value;
     }
+
+    helpers.setValue(newValue);
   };
+
   return (
     <div
       className={clsx(
-        className,
         "flex w-full",
-        type === "checkbox" ? "flex-row items-center gap-2" : "flex-col gap-1"
+        {
+          "flex-row items-center gap-2": type === "checkbox",
+          "flex-col gap-1": type !== "checkbox",
+        },
+        className
       )}
     >
       <label
-        className={clsx("text-sm", type !== "checkbox" ? "font-semibold" : "")}
+        className={clsx("text-sm", {
+          "font-semibold": type !== "checkbox",
+        })}
         htmlFor={name}
       >
         {labelName}
@@ -55,10 +66,12 @@ export default function FieldForm({
         placeholder={disabled ? null : placeholder}
         className={clsx(
           "text-lg",
-          type !== "checkbox" ? "px-3 py-2 w-full rounded-lg" : "",
-          disabled
-            ? "disabled:text-light-dark disabled:opacity-100 disabled:bg-transparent"
-            : "bg-white border border-gray-300"
+          {
+            "px-3 py-2 w-full rounded-lg": type !== "checkbox",
+            "disabled:text-light-dark disabled:opacity-100 disabled:bg-transparent border-none":
+              disabled,
+          },
+          "bg-white border border-gray-300"
         )}
         disabled={disabled}
         as={type === "select" ? "select" : "input"}
@@ -67,7 +80,7 @@ export default function FieldForm({
         {type === "select" ? children : null}
       </Field>
       <ErrorMessage name={name}>
-        {(msg) => <p className="text-red-600 text-sm">{msg}</p>}
+        {(msg) => (msg ? <p className="text-red-600 text-sm">{msg}</p> : null)}
       </ErrorMessage>
     </div>
   );

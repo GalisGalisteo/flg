@@ -7,9 +7,9 @@ export const howCognized = [
   "Un altre",
 ] as const;
 
-type HowCognized = "" | (typeof howCognized)[number];
+export type HowCognized = (typeof howCognized)[number];
 
-interface Member {
+export interface Member {
   id?: string;
   name: string;
   surname: string;

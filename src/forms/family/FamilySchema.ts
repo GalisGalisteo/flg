@@ -3,7 +3,7 @@ import { birthDate18 } from "@/utils/utils";
 import { array, boolean, date, number, object, string } from "yup";
 import { isValid } from "iban";
 
-export const registrationSchema = object({
+export const familySchema = object({
   members: array().of(
     object({
       name: string()

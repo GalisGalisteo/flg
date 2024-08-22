@@ -1,20 +1,11 @@
 "use client";
 
-import ProtectedRoute from "@/components/ProtectedRoutes";
+import ProtectedRoute from "@/components/common/ProtectedRoutes";
 import LoadingImage from "@/components/common/LoadingImage";
-import RegistrationForm from "@/components/form/RegistrationForm";
+import FamilyForm from "@/components/form/FamilyForm";
 import { useCognitoContext } from "@/contexts/cognito/useCognitoContext";
-import { gql, useQuery } from "@apollo/client";
-import { Suspense } from "react";
-
-const getPrices = gql`
-  query GetPrices {
-    getPrices {
-      cataloniaBased
-      outsideCatalonia
-    }
-  }
-`;
+import { useQuery } from "@apollo/client";
+import { getPrices } from "@/graphql/mutations";
 
 export default function RegistrationPage() {
   const { userEmail } = useCognitoContext();
@@ -32,7 +23,7 @@ export default function RegistrationPage() {
         </div>
         {error && !loading ? <p>An error ocurred: {error.message}</p> : null}
         {!loading && data ? (
-          <RegistrationForm
+          <FamilyForm
             userEmail={userEmail}
             prices={{
               cataloniaBased: "10",

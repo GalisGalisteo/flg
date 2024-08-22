@@ -1,77 +1,25 @@
 "use client";
 
-import { Family, howCognized } from "@/types/family";
-import { Form, Formik } from "formik";
-import { useEffect, useMemo, useState } from "react";
-import FieldForm from "./FieldForm";
-import { Button } from "../Button";
-import { gql, useMutation } from "@apollo/client";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Form, Formik } from "formik";
+import { useMutation } from "@apollo/client";
+import { printFormat } from "iban";
 import clsx from "clsx";
-import { registrationSchema } from "./RegistrationSchema";
+
+import { familySchema } from "../../forms/family/FamilySchema";
+
+import FieldForm from "./FieldForm";
+import { Button } from "../common/Button";
 import ChildrenFieldArray from "./ChildrenFieldArray";
 
-const createFamilyAccount = gql`
-  mutation (
-    $members: [MemberData]
-    $familyData: FamilyData
-    $expectedMembers: String
-  ) {
-    createFamilyAccount(
-      members: $members
-      familyData: $familyData
-      expectedMembers: $expectedMembers
-    ) {
-      familyId
-    }
-  }
-`;
-
-const updateFamilyProperties = gql`
-  mutation (
-    $familyAccountId: String
-    $updatedFamilyProperties: UpdatedFamilyProperties
-  ) {
-    updateFamilyProperties(
-      familyAccountId: $familyAccountId
-      updatedFamilyProperties: $updatedFamilyProperties
-    ) {
-      id
-      foundingMemberExternalId
-      members {
-        id
-        name
-        surname
-        birthDate
-        email
-        phone
-        nif
-        address {
-          street
-          streetNumber
-          flatNumber
-          postcode
-          city
-          district
-          country
-        }
-        memberExternalId
-        adminAssignatedId
-      }
-      bankAccount
-      children
-      agreements {
-        agreement1
-        agreement2
-        agreement3
-      }
-      isActive
-      activationDate
-      inactivationDate
-      howCognized
-    }
-  }
-`;
+import { updateMembers, calculatePrice } from "@/utils/utils";
+import { Family, howCognized } from "@/types/family";
+import {
+  createFamilyAccount,
+  updateFamilyProperties,
+} from "@/graphql/mutations";
+import { initializeFormValues } from "@/forms/family/useInitializeValues";
 
 interface RegistrationFormProps {
   userEmail?: string | null;
@@ -99,62 +47,10 @@ export default function RegistrationForm({
 
   const router = useRouter();
 
-  const initialValues: Family = useMemo(() => {
-    return {
-      members: data?.members.map((member) => ({
-        name: member.name || "",
-        surname: member.surname || "",
-        birthDate: member.birthDate || "",
-        email: member.email || userEmail || "",
-        nif: member.nif || "",
-        phone: member.phone || "",
-        address: {
-          street: member.address.street || "",
-          streetNumber: member.address.streetNumber || "",
-          postcode: member.address.postcode || "",
-          city: member.address.city || "",
-          flatNumber: member.address.flatNumber || "",
-          district: member.address.district || "",
-          country: member.address.country || "",
-        },
-      })) || [
-        {
-          name: "",
-          surname: "",
-          birthDate: "",
-          email: userEmail || "",
-          nif: "",
-          phone: "",
-          address: {
-            street: "",
-            streetNumber: "",
-            postcode: "",
-            city: "",
-            flatNumber: "",
-            district: "",
-            country: "",
-          },
-        },
-      ],
-      catResident:
-        data?.catResident === true
-          ? "1"
-          : data?.catResident === false
-          ? "0"
-          : "" || "",
-      bankAccount: data?.bankAccount || "",
-      numberUsers: data?.numberUsers || 1,
-      price: "0",
-      numberChildren: data?.children.length || 0,
-      children: data?.children || [],
-      howCognized: data?.howCognized || "",
-      agreements: {
-        agreement1: data?.agreements.agreement1 || false,
-        agreement2: data?.agreements.agreement2 || false,
-        agreement3: data?.agreements.agreement3 || false,
-      },
-    };
-  }, [data, userEmail]);
+  const initialValues = useMemo(
+    () => initializeFormValues(data, userEmail),
+    [data, userEmail]
+  );
 
   const fetchCreateFamily = async (values: Family) => {
     try {
@@ -188,7 +84,6 @@ export default function RegistrationForm({
         //     ? false
         //     : null,
       };
-      console.log("🚀 ~ fetchCreateFamily ~ familyData:", familyData);
 
       const response = await createFamily({
         variables: {
@@ -235,7 +130,7 @@ export default function RegistrationForm({
     <>
       <Formik
         initialValues={initialValues}
-        validationSchema={registrationSchema}
+        validationSchema={familySchema}
         validateOnChange
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
@@ -243,45 +138,25 @@ export default function RegistrationForm({
         }}
       >
         {({ isSubmitting, values, setFieldValue }) => {
-          // adding members
-          if (values.numberUsers > values.members.length) {
-            const newMembers = [...values.members];
-            for (let i = values.members.length; i < values.numberUsers; i++) {
-              newMembers.push({
-                name: "",
-                surname: "",
-                birthDate: "",
-                email: "",
-                nif: "",
-                phone: "",
-                address: {
-                  street: "",
-                  streetNumber: "",
-                  postcode: "",
-                  city: "",
-                  flatNumber: "",
-                  district: "",
-                  country: "",
-                },
-              });
-            }
-            setFieldValue("members", newMembers);
-          } else if (values.numberUsers < values.members.length) {
-            // Removing members
-            const newMembers = values.members.slice(0, values.numberUsers);
-            setFieldValue("members", newMembers);
+          // Update the members array if necessary
+          if (values.numberUsers !== values.members.length) {
+            const updatedMembers = updateMembers(
+              values.members,
+              values.numberUsers
+            );
+            setFieldValue("members", updatedMembers);
           }
-          useEffect(() => {
-            let price = 0;
 
-            if (values.catResident === "1") {
-              price = Number(prices?.cataloniaBased) * values.numberUsers;
-            } else if (values.catResident === "0") {
-              price = Number(prices?.outsideCatalonia) * values.numberUsers;
-            }
+          // calculating membership price
+          const calculatedPrice = calculatePrice(
+            values.catResident,
+            values.numberUsers,
+            prices
+          );
 
-            setFieldValue("price", `${price.toFixed(2)} €`);
-          }, [values.catResident, values.numberUsers, prices]);
+          if (values.price !== calculatedPrice) {
+            setFieldValue("price", calculatedPrice);
+          }
 
           return (
             <Form
@@ -334,6 +209,7 @@ export default function RegistrationForm({
                       labelName="Data de naixement"
                       type="date"
                       disabled={isDisabled}
+                      placeholder="dd-mm-yyyy"
                     />
                     <FieldForm
                       name={`members[${index}].nif`}
@@ -443,7 +319,6 @@ export default function RegistrationForm({
                   labelName="Preu quota anual"
                   type="text"
                   disabled
-                  // needs to calculate price
                 />
                 <FieldForm
                   className="col-span-2"
@@ -469,6 +344,7 @@ export default function RegistrationForm({
                   type="text"
                   placeholder="IBAN"
                   disabled={isDisabled}
+                  formatValue={(value) => printFormat(value, " ")}
                 />
                 <FieldForm
                   name="numberChildren"

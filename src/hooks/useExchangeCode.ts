@@ -1,22 +1,11 @@
 "use client";
 
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { useLoginContext } from "../contexts/login/useLogingContext";
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useCognitoContext } from "@/contexts/cognito/useCognitoContext";
-
-const loginMutation = gql`
-  mutation ($code: String!) {
-    login(code: $code) {
-      loginResponse
-      registrationResponse {
-        hasFamilyAccount
-        email
-      }
-    }
-  }
-`;
+import { loginMutation } from "@/graphql/mutations";
 
 export const useExchangeCode = () => {
   const { setUserEmail } = useCognitoContext();

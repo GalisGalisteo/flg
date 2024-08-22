@@ -3,54 +3,14 @@
 import AdminTable from "@/components/AdminTable";
 import LoadingImage from "@/components/common/LoadingImage";
 import Modal from "@/components/common/Modal";
-import RegistrationForm from "@/components/form/RegistrationForm";
-import ProtectedRoute from "@/components/ProtectedRoutes";
+import FamilyForm from "@/components/form/FamilyForm";
+import ProtectedRoute from "@/components/common/ProtectedRoutes";
 import { Family } from "@/types/family";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { FaEdit, FaTrash, FaHome } from "react-icons/fa";
-
-// GraphQL query to get family data
-const listFamilyAccount = gql`
-  query ListFamilyAccounts {
-    listFamilyAccounts {
-      id
-      foundingMemberExternalId
-      members {
-        id
-        name
-        surname
-        birthDate
-        email
-        phone
-        nif
-        address {
-          street
-          streetNumber
-          flatNumber
-          postcode
-          city
-          district
-          country
-        }
-        memberExternalId
-        adminAssignatedId
-      }
-      bankAccount
-      children
-      agreements {
-        agreement1
-        agreement2
-        agreement3
-      }
-      isActive
-      activationDate
-      inactivationDate
-      howCognized
-    }
-  }
-`;
+import { listFamilyAccount } from "@/graphql/mutations";
 
 export default function AdminPanel() {
   const { loading, error, data } = useQuery(listFamilyAccount);
@@ -206,7 +166,7 @@ export default function AdminPanel() {
         <>
           <AdminTable columns={columns} data={transformedData} />
           <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-            <RegistrationForm data={selectedMember} adminpanel disabled />
+            <FamilyForm data={selectedMember} adminpanel disabled />
           </Modal>
         </>
       ) : (
