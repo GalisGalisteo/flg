@@ -14,12 +14,14 @@ import { Button } from "../common/Button";
 import ChildrenFieldArray from "./ChildrenFieldArray";
 
 import { updateMembers, calculatePrice } from "@/utils/utils";
-import { Family, howCognized } from "@/types/family";
+import { DatePickerValue, Family, howCognized } from "@/types/family";
 import {
   createFamilyAccount,
   updateFamilyProperties,
 } from "@/graphql/mutations";
 import { initializeFormValues } from "@/forms/family/useInitializeValues";
+import Datepicker from "react-tailwindcss-datepicker";
+import DatePickerField from "./DatePickerField";
 
 interface RegistrationFormProps {
   userEmail?: string | null;
@@ -45,6 +47,14 @@ export default function RegistrationForm({
   const [createFamily] = useMutation(createFamilyAccount);
   const [updateFamily] = useMutation(updateFamilyProperties);
 
+  const [value, setValue] = useState<{
+    startDate: Date | null;
+    endDate: Date | null;
+  } | null>({
+    startDate: null,
+    endDate: null,
+  });
+
   const router = useRouter();
 
   const initialValues = useMemo(
@@ -57,7 +67,7 @@ export default function RegistrationForm({
       const memberData = values.members.map((member) => ({
         name: member.name,
         surname: member.surname,
-        birthDate: member.birthDate,
+        birthDate: (member.birthDate as DatePickerValue).startDate,
         email: member.email,
         phone: member.phone,
         nif: member.nif,
@@ -158,6 +168,8 @@ export default function RegistrationForm({
             setFieldValue("price", calculatedPrice);
           }
 
+          console.log(values);
+
           return (
             <Form
               className={clsx(
@@ -204,13 +216,14 @@ export default function RegistrationForm({
                     disabled={isDisabled}
                   />
                   <div className="sm:flex gap-3">
-                    <FieldForm
+                    {/* <FieldForm
                       name={`members[${index}].birthDate`}
                       labelName="Data de naixement"
                       type="date"
                       disabled={isDisabled}
                       placeholder="dd-mm-yyyy"
-                    />
+                    /> */}
+                    <DatePickerField name={`members[${index}].birthDate`} />
                     <FieldForm
                       name={`members[${index}].nif`}
                       labelName="DNI/NIE/Passaport"

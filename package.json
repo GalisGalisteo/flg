@@ -12,6 +12,7 @@
     "@apollo/client": "^3.10.6",
     "@tanstack/react-table": "^8.20.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "formik": "^2.4.5",
     "graphql": "^16.9.0",
     "iban": "^0.0.14",
@@ -19,6 +20,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.2.1",
+    "react-tailwindcss-datepicker": "^1.7.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {

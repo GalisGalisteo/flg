@@ -5,7 +5,11 @@ export function initializeFormValues(data?: Family, userEmail?: string | null) {
     members: data?.members.map((member) => ({
       name: member.name || "",
       surname: member.surname || "",
-      birthDate: member.birthDate || "",
+      birthDate:
+        {
+          startDate: new Date(member.birthDate as string),
+          endDate: new Date(member.birthDate as string),
+        } || "",
       email: member.email || userEmail || "",
       nif: member.nif || "",
       phone: member.phone || "",
