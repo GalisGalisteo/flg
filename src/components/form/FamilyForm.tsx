@@ -20,8 +20,6 @@ import {
   updateFamilyProperties,
 } from "@/graphql/mutations";
 import { initializeFormValues } from "@/forms/family/useInitializeValues";
-import Datepicker from "react-tailwindcss-datepicker";
-import DatePickerField from "./DatePickerField";
 
 interface RegistrationFormProps {
   userEmail?: string | null;
@@ -216,14 +214,13 @@ export default function RegistrationForm({
                     disabled={isDisabled}
                   />
                   <div className="sm:flex gap-3">
-                    {/* <FieldForm
+                    <FieldForm
                       name={`members[${index}].birthDate`}
                       labelName="Data de naixement"
                       type="date"
                       disabled={isDisabled}
-                      placeholder="dd-mm-yyyy"
-                    /> */}
-                    <DatePickerField name={`members[${index}].birthDate`} />
+                    />
+                    {/* <DatePickerField name={`members[${index}].birthDate`} /> */}
                     <FieldForm
                       name={`members[${index}].nif`}
                       labelName="DNI/NIE/Passaport"

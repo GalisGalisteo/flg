@@ -1,6 +1,7 @@
 import { ErrorMessage, Field, useField } from "formik";
 import { ChangeEvent } from "react";
 import clsx from "clsx";
+import DatePickerField from "./DatePickerField";
 
 interface FieldFormProps {
   name: string;
@@ -60,25 +61,29 @@ export default function FieldForm({
       >
         {labelName}
       </label>
-      <Field
-        name={name}
-        type={type}
-        placeholder={disabled ? null : placeholder}
-        className={clsx(
-          "text-lg",
-          {
-            "px-3 py-2 w-full rounded-lg": type !== "checkbox",
-            "disabled:text-light-dark disabled:opacity-100 disabled:bg-transparent border-none":
-              disabled,
-          },
-          "bg-white border border-gray-300"
-        )}
-        disabled={disabled}
-        as={type === "select" ? "select" : "input"}
-        onChange={handleChange}
-      >
-        {type === "select" ? children : null}
-      </Field>
+      {type === "date" ? (
+        <DatePickerField name={name} disabled={disabled} />
+      ) : (
+        <Field
+          name={name}
+          type={type}
+          placeholder={disabled ? null : placeholder}
+          className={clsx(
+            "text-lg",
+            {
+              "px-3 py-2 w-full rounded-lg": type !== "checkbox",
+              "disabled:text-light-dark disabled:opacity-100 disabled:bg-transparent border-none":
+                disabled,
+            },
+            "bg-white border border-gray-300"
+          )}
+          disabled={disabled}
+          as={type === "select" ? "select" : "input"}
+          onChange={handleChange}
+        >
+          {type === "select" ? children : null}
+        </Field>
+      )}
       <ErrorMessage name={name}>
         {(msg) => (msg ? <p className="text-red-600 text-sm">{msg}</p> : null)}
       </ErrorMessage>

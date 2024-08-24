@@ -110,7 +110,7 @@ export default function AdminTable({ columns, data }: AdminTableProps) {
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
               table.setPageIndex(page);
             }}
-            className="p-1 rounded text-center w-16  no-spinner"
+            className="p-1 rounded text-center w-16 no-spinner"
           />
           <button
             className="hover:shadow-sm hover:bg-white hover:bg-opacity-60 rounded p-1 hover:cursor-pointer"
