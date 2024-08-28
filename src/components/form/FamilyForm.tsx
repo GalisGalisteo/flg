@@ -1,25 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Form, Formik } from "formik";
-import { useMutation } from "@apollo/client";
 import { printFormat } from "iban";
 import clsx from "clsx";
-
-import { familySchema } from "../../forms/family/FamilySchema";
 
 import FieldForm from "./FieldForm";
 import { Button } from "../common/Button";
 import ChildrenFieldArray from "./ChildrenFieldArray";
 
-import { updateMembers, calculatePrice } from "@/utils/utils";
-import { DatePickerValue, Family, howCognized } from "@/types/family";
-import {
-  createFamilyAccount,
-  updateFamilyProperties,
-} from "@/graphql/mutations";
 import { initializeFormValues } from "@/forms/family/useInitializeValues";
+import { familySchema } from "@/forms/family/FamilySchema";
+
+import { useCreateFamily } from "@/hooks/useCreateFamily";
+import { useUpdateFamily } from "@/hooks/useUpdateFamily";
+
+import { updateMembers, calculatePrice } from "@/utils/utils";
+import { Family, howCognized } from "@/types/family";
 
 interface RegistrationFormProps {
   userEmail?: string | null;
@@ -42,95 +39,30 @@ export default function RegistrationForm({
   prices,
 }: RegistrationFormProps) {
   const [isDisabled, setIsDisabled] = useState(disabled);
-  const [createFamily] = useMutation(createFamilyAccount);
-  const [updateFamily] = useMutation(updateFamilyProperties);
-
-  const [value, setValue] = useState<{
-    startDate: Date | null;
-    endDate: Date | null;
-  } | null>({
-    startDate: null,
-    endDate: null,
-  });
-
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialValues = useMemo(
     () => initializeFormValues(data, userEmail),
     [data, userEmail]
   );
 
-  const fetchCreateFamily = async (values: Family) => {
+  const { fetchCreateFamily } = useCreateFamily();
+  const { fetchUpdateFamily } = useUpdateFamily(data?.id);
+
+  const handleSubmit = async (values: Family) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const memberData = values.members.map((member) => ({
-        name: member.name,
-        surname: member.surname,
-        birthDate: (member.birthDate as DatePickerValue).startDate,
-        email: member.email,
-        phone: member.phone,
-        nif: member.nif,
-        address: {
-          street: member.address.street,
-          streetNumber: member.address.streetNumber,
-          postcode: member.address.postcode,
-          city: member.address.city,
-          country: member.address.country,
-          flatNumber: member.address.flatNumber,
-          district: member.address.district,
-        },
-      }));
-
-      const familyData = {
-        bankAccount: values.bankAccount,
-        children: values.children,
-        agreements: values.agreements,
-        howCognized: values.howCognized,
-        // catResident:
-        //   values.catResident === "1"
-        //     ? true
-        //     : values.catResident === "0"
-        //     ? false
-        //     : null,
-      };
-
-      const response = await createFamily({
-        variables: {
-          members: memberData,
-          familyData: familyData,
-          expectedMembers: values.numberUsers.toString(),
-        },
-      });
-      const statusCode = response.extensions?.statusCode;
-      if (statusCode === 200) {
-        router.push("/");
+      if (adminpanel) {
+        await fetchUpdateFamily(values);
+      } else {
+        await fetchCreateFamily(values);
       }
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const fetchUpdateFamily = async (values: Family) => {
-    try {
-      const response = await updateFamily({
-        variables: {
-          familyAccountId: data?.id,
-          updateFamilyProperties: {
-            ...values,
-            // catResident:
-            //   values.catResident === "1"
-            //     ? true
-            //     : values.catResident === "0"
-            //     ? false
-            //     : null,
-          },
-        },
-      });
-      const statusCode = response.extensions?.statusCode;
-      if (statusCode === 200) {
-        console.log(response);
-      }
-    } catch (error) {
-      console.log(error);
+      setError((error as Error).message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -165,9 +97,6 @@ export default function RegistrationForm({
           if (values.price !== calculatedPrice) {
             setFieldValue("price", calculatedPrice);
           }
-
-          console.log(values);
-
           return (
             <Form
               className={clsx(
@@ -409,12 +338,8 @@ export default function RegistrationForm({
                     color="success"
                     name="Guardar"
                     type="button"
-                    onClick={() => {
-                      if (adminpanel) {
-                        fetchUpdateFamily(values);
-                      }
-                      fetchCreateFamily(values);
-                    }}
+                    isLoading={isLoading}
+                    onClick={() => handleSubmit}
                   />
                 </>
               )}
@@ -422,6 +347,9 @@ export default function RegistrationForm({
           );
         }}
       </Formik>
+      {error ? (
+        <p className="text-red-600">Ups! An error ocurred: {error}</p>
+      ) : null}
     </>
   );
 }
