@@ -1,19 +1,21 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client";
-import { useLoginContext } from "../contexts/login/useLogingContext";
-import { useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useCognitoContext } from "@/contexts/cognito/useCognitoContext";
 import { loginMutation } from "@/graphql/mutations";
+import { useRouter } from "next/navigation";
+import { useLoginContext } from "@/contexts/login/useLogingContext";
+import { useCognitoContext } from "@/contexts/cognito/useCognitoContext";
 
 export const useExchangeCode = () => {
   const { setUserEmail } = useCognitoContext();
   const { setIsLoggedIn } = useLoginContext();
   const [login] = useMutation(loginMutation);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const exchangeCode = useCallback(async () => {
+    setError(null);
     try {
       const response = await login({ variables: { code: "user" } });
       const statusCode = response.extensions?.statusCode;
@@ -32,9 +34,10 @@ export const useExchangeCode = () => {
       }
     } catch (error) {
       setIsLoggedIn(false);
-      console.log(error);
+      console.error(error);
+      setError("An error ocurred. Please try again later.");
     }
   }, [login, setIsLoggedIn, setUserEmail, router]);
 
-  return { exchangeCode };
+  return { exchangeCode, error };
 };

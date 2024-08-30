@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Form, Formik } from "formik";
 import { printFormat } from "iban";
 import clsx from "clsx";
@@ -38,6 +39,8 @@ export default function RegistrationForm({
   adminpanel = false,
   prices,
 }: RegistrationFormProps) {
+  const router = useRouter();
+
   const [isDisabled, setIsDisabled] = useState(disabled);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,17 +56,16 @@ export default function RegistrationForm({
   const handleSubmit = async (values: Family) => {
     setIsLoading(true);
     setError(null);
-    try {
-      if (adminpanel) {
-        await fetchUpdateFamily(values);
-      } else {
-        await fetchCreateFamily(values);
-      }
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setIsLoading(false);
+    const result = adminpanel
+      ? await fetchUpdateFamily(values)
+      : await fetchCreateFamily(values);
+
+    if (!result.success) {
+      setError(result.message);
+    } else {
+      router.push(adminpanel ? "/adminpanel" : "/userpanel");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -72,12 +74,9 @@ export default function RegistrationForm({
         initialValues={initialValues}
         validationSchema={familySchema}
         validateOnChange
-        onSubmit={(values, { setSubmitting }) => {
-          setSubmitting(false);
-          setIsDisabled(true);
-        }}
+        onSubmit={() => setIsDisabled(true)}
       >
-        {({ isSubmitting, values, setFieldValue }) => {
+        {({ values, setFieldValue }) => {
           // Update the members array if necessary
           if (values.numberUsers !== values.members.length) {
             const updatedMembers = updateMembers(
@@ -318,10 +317,7 @@ export default function RegistrationForm({
                 disabled={isDisabled}
               />
               {!isDisabled ? (
-                <Button
-                  name={isSubmitting ? "Carregant" : "Continuar"}
-                  type="submit"
-                />
+                <Button name="Continuar" type="submit" />
               ) : (
                 <>
                   <Button
@@ -339,7 +335,7 @@ export default function RegistrationForm({
                     name="Guardar"
                     type="button"
                     isLoading={isLoading}
-                    onClick={() => handleSubmit}
+                    onClick={() => handleSubmit(values)}
                   />
                 </>
               )}

@@ -5,7 +5,7 @@ import { useExchangeCode } from "@/hooks/useExchangeCode";
 import LoadingImage from "@/components/common/LoadingImage";
 
 export default function Home() {
-  const { exchangeCode } = useExchangeCode();
+  const { exchangeCode, error } = useExchangeCode();
 
   useEffect(() => {
     exchangeCode();
@@ -13,7 +13,7 @@ export default function Home() {
 
   return (
     <div className="flex justify-center items-center h-[500px]">
-      <LoadingImage />
+      {error ? <p className="text-red-600">{error}</p> : <LoadingImage />}
     </div>
   );
 }

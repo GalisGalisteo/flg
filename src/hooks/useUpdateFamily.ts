@@ -1,7 +1,6 @@
 import { useMutation } from "@apollo/client";
 import { Family } from "@/types/family";
 import { updateFamilyProperties } from "@/graphql/mutations";
-import { useState } from "react";
 
 export const useUpdateFamily = (familyId: string | undefined) => {
   const [updateFamily] = useMutation(updateFamilyProperties);
@@ -24,9 +23,14 @@ export const useUpdateFamily = (familyId: string | undefined) => {
       });
 
       if (response?.extensions?.statusCode === 200) {
-        console.log("Family updated successfully:", response);
+        return { success: true, message: "Family updated successfully" };
+      } else {
+        return { success: false, message: "Family update failed" };
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: "Family creation failed" };
+    }
   };
 
   return {

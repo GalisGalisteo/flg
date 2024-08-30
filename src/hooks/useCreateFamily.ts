@@ -1,11 +1,8 @@
-import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client";
 import { Family } from "@/types/family";
 import { createFamilyAccount } from "@/graphql/mutations";
-import { useState } from "react";
 
 export const useCreateFamily = () => {
-  const router = useRouter();
   const [createFamily] = useMutation(createFamilyAccount);
 
   const formatMemberData = (members: Family["members"]) => {
@@ -57,9 +54,14 @@ export const useCreateFamily = () => {
       });
 
       if (response?.extensions?.statusCode === 200) {
-        router.push("/");
+        return { success: true, message: "Family created successfully" };
+      } else {
+        return { success: false, message: "Family creation failed" };
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: "Family creation failed" };
+    }
   };
 
   return {
