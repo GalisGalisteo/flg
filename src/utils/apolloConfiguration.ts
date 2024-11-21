@@ -24,7 +24,7 @@ const statusLink = new ApolloLink((operation, forward) => {
 });
 
 const httpLink = new HttpLink({
-  uri: "http://localhost:4000/api/v1",
+  uri: "https://localhost:4000/api/v1",
   //uri: "/api/:localhost:3001/",
   credentials: "include",
 });

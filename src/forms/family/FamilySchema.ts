@@ -6,15 +6,11 @@ import { isValid } from "iban";
 export const familySchema = object({
   members: array().of(
     object({
-      name: string()
-        .min(2, "Si us plau, escriu el teu nom")
+      name: string().required("*Obligatori"),
+      surname: string().required("*Obligatori"),
+      birthDate: date()
+        .max(birthDate18, "Has de ser major de 18 anys per ser soci")
         .required("*Obligatori"),
-      surname: string()
-        .min(2, "Si us plau, escriu el teu cognom")
-        .required("*Obligatori"),
-      // birthDate: date()
-      //   .max(birthDate18, "Has de ser major de 18 anys per ser soci")
-      //   .required("*Obligatori"),
       nif: string().required("*Obligatori"),
       email: string()
         .email("Adreça de correu electrònic incorrecte")

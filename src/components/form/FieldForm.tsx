@@ -1,7 +1,7 @@
 import { ErrorMessage, Field, useField } from "formik";
 import { ChangeEvent } from "react";
 import clsx from "clsx";
-import DatePickerField from "./DatePickerField";
+import DatePickerField from "./DatePicker/DatePickerField";
 
 interface FieldFormProps {
   name: string;

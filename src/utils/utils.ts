@@ -23,7 +23,7 @@ export function calculatePrice(
 }
 
 export function updateMembers(members: Member[], numberUsers: number) {
-  const newMembers = [...members];
+  let newMembers = [...members];
 
   if (numberUsers > members.length) {
     for (let i = members.length; i < numberUsers; i++) {
@@ -46,7 +46,7 @@ export function updateMembers(members: Member[], numberUsers: number) {
       });
     }
   } else if (numberUsers < members.length) {
-    return members.slice(0, numberUsers);
+    newMembers = members.slice(0, numberUsers);
   }
 
   return newMembers;

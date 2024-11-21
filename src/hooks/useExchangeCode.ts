@@ -17,7 +17,9 @@ export const useExchangeCode = () => {
   const exchangeCode = useCallback(async () => {
     setError(null);
     try {
-      const response = await login({ variables: { code: "user" } });
+      const response = await login({
+        variables: { code: "admin" },
+      });
       const statusCode = response.extensions?.statusCode;
       if (statusCode === 200) {
         setIsLoggedIn(true);

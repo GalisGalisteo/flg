@@ -1,0 +1,41 @@
+/* DatePickerField.css */
+.custom-calendar .react-datepicker__day--selected {
+    @apply bg-primary text-white
+}
+  
+.custom-calendar .react-datepicker__day--keyboard-selected {
+    @apply bg-primary-medium-light text-white
+}
+
+.custom-calendar .react-datepicker__day:hover {
+    @apply bg-primary-light text-black
+}
+
+.custom-calendar .react-datepicker__day--selected:hover {
+    @apply bg-primary-medium-light text-white
+}
+
+.custom-calendar .react-datepicker__header {
+    @apply bg-primary-medium-light text-black
+}
+
+.custom-calendar .react-datepicker__navigation-icon::before {
+    @apply border-white
+}
+
+.custom-calendar .react-datepicker__navigation-icon:hover::before {
+    @apply border-gray-400
+}
+
+.custom-calendar .react-datepicker__year-read-view--down-arrow {
+    @apply border-white
+}
+
+.custom-calendar .react-datepicker__year-read-view--down-arrow:hover {
+    @apply border-gray-400
+}
+
+.custom-calendar .react-datepicker__year-read-view--selected-year:hover {
+    @apply bg-primary-medium-light text-light-dark
+}
+

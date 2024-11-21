@@ -14,13 +14,17 @@ import { listFamilyAccount } from "@/graphql/mutations";
 
 export default function AdminPanel() {
   const { loading, error, data } = useQuery(listFamilyAccount);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState();
+  const [selectedMember, setSelectedMember] = useState<Family | undefined>(
+    undefined
+  );
+  const [isMember, setIsMember] = useState<boolean | null>(null);
 
   // Transform the data so that each member is a separate row
   const transformedData = useMemo(() => {
     if (!data) return [];
-    return data.listFamilyAccounts.flatMap((family) =>
+    return data.listFamilyAccounts.flatMap((family: Family) =>
       family.members.map((member) => ({
         ...family,
         members: [member], // This is the individual member object
@@ -130,7 +134,10 @@ export default function AdminPanel() {
         header: "Edició",
         cell: (row) => (
           <div className="flex space-x-2">
-            <button className="text-green-600 hover:text-green-900">
+            <button
+              className="text-green-600 hover:text-green-900"
+              onClick={() => handleEdit(row.row.original, false)}
+            >
               <FaHome />
             </button>
             <button
@@ -138,7 +145,7 @@ export default function AdminPanel() {
               onClick={() => {
                 // const member = { members: [row.row.original.member] };
                 console.log("row.row.original", row.row.original);
-                return handleEdit(row.row.original);
+                return handleEdit(row.row.original, true);
               }}
             >
               <FaEdit />
@@ -153,9 +160,11 @@ export default function AdminPanel() {
     []
   );
 
-  const handleEdit = (member) => {
+  const handleEdit = (member: Family, show: boolean) => {
+    console.log("🚀 ~ handleEdit ~ show:", show);
     setSelectedMember(member);
     setIsModalOpen(true);
+    setIsMember(show);
   };
 
   return (
@@ -166,7 +175,12 @@ export default function AdminPanel() {
         <>
           <AdminTable columns={columns} data={transformedData} />
           <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-            <FamilyForm data={selectedMember} adminpanel disabled />
+            <FamilyForm
+              data={selectedMember}
+              adminpanel
+              disabled
+              isMember={isMember}
+            />
           </Modal>
         </>
       ) : (

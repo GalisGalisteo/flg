@@ -9,16 +9,11 @@ export const howCognized = [
 
 export type HowCognized = (typeof howCognized)[number];
 
-export interface DatePickerValue {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
 export interface Member {
   id?: string;
   name: string;
   surname: string;
-  birthDate: DatePickerValue | string;
+  birthDate: string;
   email: string | null;
   nif: string;
   phone: string;

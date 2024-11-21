@@ -74,6 +74,34 @@ export const updateFamilyProperties = gql`
   }
 `;
 
+export const updateMember = gql`
+  mutation ($familyAccountId: String!, $updatedMember: UpdateMember!) {
+    updateMember(
+      familyAccountId: $familyAccountId
+      updatedMember: $updatedMember
+    ) {
+      id
+      name
+      surname
+      birthDate
+      email
+      phone
+      nif
+      address {
+        street
+        streetNumber
+        flatNumber
+        postcode
+        city
+        district
+        country
+      }
+      memberExternalId
+      adminAssignatedId
+    }
+  }
+`;
+
 export const getFamilyAccount = gql`
   query GetFamilyAccount {
     getFamilyAccount {
